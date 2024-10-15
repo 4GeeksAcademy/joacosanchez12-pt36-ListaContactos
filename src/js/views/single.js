@@ -1,26 +1,47 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useEffect, useContext } from "react";
 import PropTypes from "prop-types";
 import { Link, useParams } from "react-router-dom";
 import { Context } from "../store/appContext";
 
 export const Single = props => {
-	const { store, actions } = useContext(Context);
-	const params = useParams();
-	return (
-		<div className="jumbotron">
-			<h1 className="display-4">This will show the demo element: {store.demo[params.theid].title}</h1>
+    const { store, actions } = useContext(Context);
+    const params = useParams();
+    const contactId = parseInt(params.theid); // Convertimos el id a entero para comparar
 
-			<hr className="my-4" />
+    // Buscar el contacto en el store usando el id
+    const contact = store.contacts.find(contact => contact.id === contactId);
 
-			<Link to="/">
-				<span className="btn btn-primary btn-lg" href="#" role="button">
-					Back home
-				</span>
-			</Link>
-		</div>
-	);
+    useEffect(() => {
+        // En caso de que el contacto no esté en el store, cargar los contactos (si no se han cargado previamente)
+        if (!contact) {
+            actions.loadContacts();
+        }
+    }, [contact]);
+
+    return (
+        <div className="jumbotron">
+            {contact ? (
+                <>
+                    <h1 className="display-4">Detalles del Contacto: {contact.full_name}</h1>
+                    <p className="lead">Email: {contact.email}</p>
+                    <p className="lead">Teléfono: {contact.phone}</p>
+                    <p className="lead">Dirección: {contact.address}</p>
+                </>
+            ) : (
+                <p>Cargando datos del contacto...</p>
+            )}
+
+            <hr className="my-4" />
+
+            <Link to="/">
+                <span className="btn btn-primary btn-lg" role="button">
+                    Volver a Inicio
+                </span>
+            </Link>
+        </div>
+    );
 };
 
 Single.propTypes = {
-	match: PropTypes.object
+    match: PropTypes.object
 };
